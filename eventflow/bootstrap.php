@@ -15,3 +15,6 @@ require_once __DIR__ . '/src/AnalyticsClient.php';
 require_once __DIR__ . '/src/BookingService.php';
 require_once __DIR__ . '/src/PricingStrategyInterface.php';
 require_once __DIR__ . '/src/FestivalPricingStrategy.php';
+require_once __DIR__ . '/src/PaymentGatewayInterface.php';
+require_once __DIR__ . '/src/StripePaymentAdapter.php';
+require_once __DIR__ . '/src/PayFastPaymentAdapter.php';
