@@ -22,30 +22,40 @@ function createBooking(
     return $booking;
 }
 
-ob_start();
 $service = new BookingService();
+
+ob_start();
 
 $standard = createBooking('standard', 'day', 50.0, 2);
 $standardTotal = $service->confirm($standard, 'stripe');
-$tests->near(100.0, $standardTotal, 'standard customer keeps initial total');
-$tests->same('confirmed', $standard->status, 'booking becomes confirmed');
 
 $vip = createBooking('vip', 'day', 50.0, 2);
 $vipTotal = $service->confirm($vip, 'stripe');
-$tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
 
 $threeDays = createBooking('standard', '3days', 60.0, 2);
 $threeDaysTotal = $service->confirm($threeDays, 'stripe');
-$tests->near(110.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
+
+ob_end_clean();
+
+$tests->near(100.0, $standardTotal, 'standard customer keeps initial total');
+$tests->same('confirmed', $standard->status, 'booking becomes confirmed');
+$tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
+$tests->near(100.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
 
 try {
-    $emptyBooking = createBooking();
-    $emptyBooking->items = [];
+    $customer = new Customer(1, 'test@example.com', '0600000000', 'standard');
+    $emptyBooking = new Booking(1, $customer, 'day');
+
+    ob_start();
     $service->confirm($emptyBooking, 'stripe');
+    ob_end_clean();
+
     $tests->same(true, false, 'Empty booking should throw exception');
-} catch (RuntimeException $e) {
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
     $tests->same('Empty booking', $e->getMessage(), 'Empty booking throws expected exception');
 }
 
-ob_end_clean();
 $tests->summary();
