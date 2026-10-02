@@ -15,7 +15,7 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 | 2 | Variables magiques et constantes en clair dans BookingService.php | Règle métier | Important |
 | 3 | Naming des fonctions dans BookingService.php, TestRunner.php | Lisibilité | Très Important |
 | 4 | Pas de garde fou contre les totaux négatifs | Règles métier | Critique |
-| 5 |  |  |  |
+| 5 | SRP non respecté | Responsabilité | Critique |
 | 6 |  |  |  |
 
 ## 3. Nos trois priorités
