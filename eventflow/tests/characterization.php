@@ -12,9 +12,10 @@ function createBooking(
     string $passType = 'day',
     float $price = 50.0,
     int $quantity = 1,
-    ?string $phone = '0600000000'
+    ?string $phone = '0600000000',
+    string $email = 'test@example.com'
 ): Booking {
-    $customer = new Customer(1, 'test@example.com', $phone, $customerType);
+    $customer = new Customer(1, $email, $phone, $customerType);
     $ticket = new Ticket('TEST', 'Ticket test', $price);
     $booking = new Booking(1, $customer, $passType);
     $booking->addItem(new BookingItem($ticket, $quantity));
@@ -36,6 +37,15 @@ $tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
 $threeDays = createBooking('standard', '3days', 60.0, 2);
 $threeDaysTotal = $service->confirm($threeDays, 'stripe');
 $tests->near(110.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
+
+try {
+    $emptyBooking = createBooking();
+    $emptyBooking->items = [];
+    $service->confirm($emptyBooking, 'stripe');
+    $tests->same(true, false, 'Empty booking should throw exception');
+} catch (RuntimeException $e) {
+    $tests->same('Empty booking', $e->getMessage(), 'Empty booking throws expected exception');
+}
 
 ob_end_clean();
 $tests->summary();
