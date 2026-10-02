@@ -35,8 +35,6 @@ $vipTotal = $service->confirm($vip, 'stripe');
 $threeDays = createBooking('standard', '3days', 60.0, 2);
 $threeDaysTotal = $service->confirm($threeDays, 'stripe');
 
-ob_end_clean();
-
 $tests->near(100.0, $standardTotal, 'standard customer keeps initial total');
 $tests->same('confirmed', $standard->status, 'booking becomes confirmed');
 $tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
@@ -104,4 +102,13 @@ try {
     $tests->same(true, false, 'PayFast should not throw exception: ' . $e->getMessage());
 }
 
+$unknownBooking = createBooking('standard', 'day', 50.0, 1);
+
+ob_start();
+$totalUnknown = $service->confirm($unknownBooking, 'moyen_inconnu');
+ob_end_clean();
+
+$tests->same('confirmed', $unknownBooking->status, 'Unknown payment method confirms in legacy');
+
+ob_end_clean();
 $tests->summary();
