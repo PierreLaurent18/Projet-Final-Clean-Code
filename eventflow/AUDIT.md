@@ -15,14 +15,14 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 | 2 | Variables magiques et constantes en clair dans BookingService.php | Règle métier | Important |
 | 3 | Naming des fonctions dans BookingService.php, TestRunner.php | Lisibilité | Très Important |
 | 4 | Pas de garde fou contre les totaux négatifs | Règles métier | Critique |
-| 5 | SRP non respecté | Responsabilité | Critique |
+| 5 |  |  |  |
 | 6 |  |  |  |
 
 ## 3. Nos trois priorités
 
-1.Les gardes fous, bug financier critique et risque de crash de la passerelle de paiement
-2.Découpler le moyen de paiement Stripe
-3.OCP non respecté
+1.
+2.
+3.
 
 ## 4. Risques avant refactoring
 
