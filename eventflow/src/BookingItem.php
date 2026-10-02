@@ -9,4 +9,9 @@ final class BookingItem
         public int $quantity
     ) {
     }
+
+    public function getSubtotal(): float
+    {
+        return $this->ticket->price * $this->quantity;
+    }
 }
