@@ -26,4 +26,6 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 
 ## 4. Risques avant refactoring
 
-À compléter.
+1. Peut mener à des erreurs et refus de la part des prestataires de paiement. Peut aussi rendre faux les statistiques financieres et sur les resultats de l'entreprise.
+2. Délais plus long avant de regler un problème concernant cette partie du code.
+3. Introduire des problèmes globaux lorsqu'on veut faire un simple ajout.
