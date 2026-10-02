@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 final class BookingService
 {
+    private PricingStrategyInterface $pricingStrategy;
+
+    public function __construct(?PricingStrategyInterface $pricingStrategy = null)
+    {
+        $this->pricingStrategy = $pricingStrategy ?? new FestivalPricingStrategy();
+    }
     public function confirm(Booking $booking, string $paymentMethod = 'stripe'): float
     {
         if (count($booking->items) === 0) {
@@ -14,25 +20,13 @@ final class BookingService
             throw new RuntimeException('Invalid email');
         }
 
-        $total = 0.0;
-
         foreach ($booking->items as $item) {
             if ($item->quantity <= 0) {
                 throw new RuntimeException('Invalid quantity');
             }
-
-            $total += $item->ticket->price * $item->quantity;
         }
 
-        // Ancienne règle VIP : remise fixe de 10 %.
-        if ($booking->customer->type === 'vip') {
-            $total *= 0.90;
-        }
-
-        // Ancienne règle Pass 3 jours : remise fixe de 10 euros.
-        if ($booking->passType === '3days') {
-            $total -= 10.0;
-        }
+        $total = $this->pricingStrategy->calculateTotal($booking);
 
         if ($paymentMethod === 'stripe') {
             $stripe = new StripeClient();
