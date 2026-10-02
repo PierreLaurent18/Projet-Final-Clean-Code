@@ -88,4 +88,20 @@ try {
     $tests->same('Invalid quantity', $e->getMessage(), 'Invalid quantity throws expected exception');
 }
 
+try {
+    $payfastBooking = createBooking('standard', 'day', 50.0, 1);
+
+    ob_start();
+    $totalPayfast = $service->confirm($payfastBooking, 'payfast');
+    ob_end_clean();
+
+    $tests->near(50.0, $totalPayfast, 'PayFast confirm valid booking');
+    $tests->same('confirmed', $payfastBooking->status, 'PayFast booking becomes confirmed');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same(true, false, 'PayFast should not throw exception: ' . $e->getMessage());
+}
+
 $tests->summary();
