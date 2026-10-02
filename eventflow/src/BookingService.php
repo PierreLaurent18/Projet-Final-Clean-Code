@@ -6,15 +6,21 @@ final class BookingService
 {
     private PricingStrategyInterface $pricingStrategy;
     private PaymentGatewayInterface $paymentGateway;
+    private BookingRepositoryInterface $bookingRepository;
+    private MailerInterface $mailer;
 
     public function __construct(
         ?PricingStrategyInterface $pricingStrategy = null,
-        ?PaymentGatewayInterface $paymentGateway = null
+        ?PaymentGatewayInterface $paymentGateway = null,
+        ?BookingRepositoryInterface $bookingRepository = null,
+        ?MailerInterface $mailer = null
     ) {
         $this->pricingStrategy = $pricingStrategy ?? new FestivalPricingStrategy();
         $this->paymentGateway = $paymentGateway ?? new StripePaymentAdapter();
+        $this->bookingRepository = $bookingRepository ?? new SqlBookingRepository();
+        $this->mailer = $mailer ?? new EmailService();
     }
-    public function confirm(Booking $booking, string $paymentMethod = 'stripe'): float
+    public function confirm(Booking $booking): float
     {
         if (count($booking->items) === 0) {
             throw new RuntimeException('Empty booking');
@@ -41,10 +47,9 @@ final class BookingService
 
         $booking->status = 'confirmed';
 
-        echo "SQL INSERT booking={$booking->id} total={$total} status={$booking->status}" . PHP_EOL;
+        $this->bookingRepository->save($booking, $total);
 
-        $emailService = new EmailService();
-        $emailService->sendConfirmation($booking->customer->email, $booking->id);
+        $this->mailer->sendConfirmation($booking->customer->email, $booking->id);
 
         return $total;
     }

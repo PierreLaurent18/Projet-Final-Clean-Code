@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-final class EmailService
+final class EmailService implements MailerInterface
 {
     public function sendConfirmation(string $email, int $bookingId): void
     {
