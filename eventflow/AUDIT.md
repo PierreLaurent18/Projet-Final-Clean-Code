@@ -2,7 +2,8 @@
 
 ## 1. Comportement observable
 
-Index.php : On voit le payment stripe aini que la quantité payée par l'utilisateur, on voit l'email de la personne ainsi que le booking, on peut voir si le booking est confirmé ou pas et le total Final est affiché en dernier.
+Index.php : On voit le moyen de paiement aini que le montant payée par l'utilisateur. On voit la confirmation de l'enregistrement en bdd du numéro de reservation avec le montant payé. Confirmation de l'envoie par mail du numéro de reservation avec l'email du client + son numéro de reservation et pour finir, affichage du montant total final.
+
 
 tests/characterization.php : on voit le nombre de test réussis et ratés
 
