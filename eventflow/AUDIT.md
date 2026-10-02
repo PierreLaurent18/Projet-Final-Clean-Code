@@ -12,7 +12,7 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 | # | Problème | Catégorie | Impact |
 |---|---|---|---|
 | 1 | OCP non respecté dans BookingService.php | Duplication | Important |
-| 2 |  |  |  |
+| 2 | Variables magiques et constantes en clair dans BookingService.php | Règle métier | Important |
 | 3 |  |  |  |
 | 4 |  |  |  |
 | 5 |  |  |  |
