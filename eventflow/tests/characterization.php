@@ -58,4 +58,19 @@ try {
     $tests->same('Empty booking', $e->getMessage(), 'Empty booking throws expected exception');
 }
 
+try {
+    $invalidEmailBooking = createBooking('standard', 'day', 50.0, 1, '0600000000', 'email-invalide');
+
+    ob_start();
+    $service->confirm($invalidEmailBooking, 'stripe');
+    ob_end_clean();
+
+    $tests->same(true, false, 'Invalid email should throw exception');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same('Invalid email', $e->getMessage(), 'Invalid email throws expected exception');
+}
+
 $tests->summary();
