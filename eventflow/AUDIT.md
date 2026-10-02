@@ -11,7 +11,7 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 
 | # | Problème | Catégorie | Impact |
 |---|---|---|---|
-| 1 |  |  |  |
+| 1 | OCP non respecté dans BookingService.php | Duplication | Important |
 | 2 |  |  |  |
 | 3 |  |  |  |
 | 4 |  |  |  |
