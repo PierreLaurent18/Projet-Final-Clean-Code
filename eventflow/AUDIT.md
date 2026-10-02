@@ -20,9 +20,9 @@ tests/characterization.php : on voit le nombre de test réussis et ratés
 
 ## 3. Nos trois priorités
 
-1.
-2.
-3.
+1.Les gardes fous, bug financier critique et risque de crash de la passerelle de paiement
+2.SRP non respecté, Surcharge de BookingService::confirm() qui rend la méthode fragile et complexe a maintenir
+3.OCP non respecté, le mode de paiement et les notifications sont codés en dur via des conditions ce qui oblige à modifier directement le code existant, augmentant fortement le risque de régression.
 
 ## 4. Risques avant refactoring
 
