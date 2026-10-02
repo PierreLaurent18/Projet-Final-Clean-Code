@@ -73,4 +73,19 @@ try {
     $tests->same('Invalid email', $e->getMessage(), 'Invalid email throws expected exception');
 }
 
+try {
+    $invalidQtyBooking = createBooking('standard', 'day', 50.0, 0);
+
+    ob_start();
+    $service->confirm($invalidQtyBooking, 'stripe');
+    ob_end_clean();
+
+    $tests->same(true, false, 'Invalid quantity should throw exception');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same('Invalid quantity', $e->getMessage(), 'Invalid quantity throws expected exception');
+}
+
 $tests->summary();
