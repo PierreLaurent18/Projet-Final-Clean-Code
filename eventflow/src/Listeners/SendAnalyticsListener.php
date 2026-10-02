@@ -8,6 +8,9 @@ final class SendAnalyticsListener implements BookingConfirmedListenerInterface
 
     public function handle(BookingConfirmedEvent $event): void
     {
-        $this->analyticsClient->trackBooking($event->booking, $event->total);
+        $this->analyticsClient->track('booking_confirmed', [
+            'booking_id' => $event->booking->id,
+            'total' => $event->total,
+        ]);
     }
 }

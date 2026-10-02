@@ -7,19 +7,28 @@ final class BookingService
     private PricingStrategyInterface $pricingStrategy;
     private PaymentGatewayInterface $paymentGateway;
     private BookingRepositoryInterface $bookingRepository;
-    private MailerInterface $mailer;
+    
+    /** @var BookingConfirmedListenerInterface[] */
+    private array $listeners;
 
     public function __construct(
         ?PricingStrategyInterface $pricingStrategy = null,
         ?PaymentGatewayInterface $paymentGateway = null,
         ?BookingRepositoryInterface $bookingRepository = null,
-        ?MailerInterface $mailer = null
+        array $listeners = []
     ) {
         $this->pricingStrategy = $pricingStrategy ?? new FestivalPricingStrategy();
         $this->paymentGateway = $paymentGateway ?? new StripePaymentAdapter();
         $this->bookingRepository = $bookingRepository ?? new SqlBookingRepository();
-        $this->mailer = $mailer ?? new EmailService();
+
+        $this->listeners = count($listeners) > 0 ? $listeners : [
+            new SendConfirmationEmailListener(new EmailService()),
+            new AddLoyaltyPointsListener(new LoyaltyService()),
+            new SendAnalyticsListener(new AnalyticsClient()),
+            new SendSmsNotificationListener(new SmsClient()),
+        ];
     }
+
     public function confirm(Booking $booking): float
     {
         if (count($booking->items) === 0) {
@@ -46,10 +55,12 @@ final class BookingService
         }
 
         $booking->status = 'confirmed';
-
         $this->bookingRepository->save($booking, $total);
 
-        $this->mailer->sendConfirmation($booking->customer->email, $booking->id);
+        $event = new BookingConfirmedEvent($booking, $total);
+        foreach ($this->listeners as $listener) {
+            $listener->handle($event);
+        }
 
         return $total;
     }

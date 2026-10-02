@@ -8,6 +8,6 @@ final class AddLoyaltyPointsListener implements BookingConfirmedListenerInterfac
 
     public function handle(BookingConfirmedEvent $event): void
     {
-        $this->loyaltyService->addPoints($event->booking->customer, $event->total);
+        $this->loyaltyService->addPoints($event->booking->customer->id, (int) $event->total);
     }
 }
