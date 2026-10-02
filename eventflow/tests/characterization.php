@@ -12,30 +12,103 @@ function createBooking(
     string $passType = 'day',
     float $price = 50.0,
     int $quantity = 1,
-    ?string $phone = '0600000000'
+    ?string $phone = '0600000000',
+    string $email = 'test@example.com'
 ): Booking {
-    $customer = new Customer(1, 'test@example.com', $phone, $customerType);
+    $customer = new Customer(1, $email, $phone, $customerType);
     $ticket = new Ticket('TEST', 'Ticket test', $price);
     $booking = new Booking(1, $customer, $passType);
     $booking->addItem(new BookingItem($ticket, $quantity));
     return $booking;
 }
 
-ob_start();
 $service = new BookingService();
+
+ob_start();
 
 $standard = createBooking('standard', 'day', 50.0, 2);
 $standardTotal = $service->confirm($standard, 'stripe');
-$tests->near(100.0, $standardTotal, 'standard customer keeps initial total');
-$tests->same('confirmed', $standard->status, 'booking becomes confirmed');
 
 $vip = createBooking('vip', 'day', 50.0, 2);
 $vipTotal = $service->confirm($vip, 'stripe');
-$tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
 
 $threeDays = createBooking('standard', '3days', 60.0, 2);
 $threeDaysTotal = $service->confirm($threeDays, 'stripe');
-$tests->near(110.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
+
+$tests->near(100.0, $standardTotal, 'standard customer keeps initial total');
+$tests->same('confirmed', $standard->status, 'booking becomes confirmed');
+$tests->near(90.0, $vipTotal, 'legacy VIP rule gives 10 percent discount');
+$tests->near(100.0, $threeDaysTotal, 'legacy three day pass discount is 10 euros');
+
+try {
+    $customer = new Customer(1, 'test@example.com', '0600000000', 'standard');
+    $emptyBooking = new Booking(1, $customer, 'day');
+
+    ob_start();
+    $service->confirm($emptyBooking, 'stripe');
+    ob_end_clean();
+
+    $tests->same(true, false, 'Empty booking should throw exception');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same('Empty booking', $e->getMessage(), 'Empty booking throws expected exception');
+}
+
+try {
+    $invalidEmailBooking = createBooking('standard', 'day', 50.0, 1, '0600000000', 'email-invalide');
+
+    ob_start();
+    $service->confirm($invalidEmailBooking, 'stripe');
+    ob_end_clean();
+
+    $tests->same(true, false, 'Invalid email should throw exception');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same('Invalid email', $e->getMessage(), 'Invalid email throws expected exception');
+}
+
+try {
+    $invalidQtyBooking = createBooking('standard', 'day', 50.0, 0);
+
+    ob_start();
+    $service->confirm($invalidQtyBooking, 'stripe');
+    ob_end_clean();
+
+    $tests->same(true, false, 'Invalid quantity should throw exception');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same('Invalid quantity', $e->getMessage(), 'Invalid quantity throws expected exception');
+}
+
+try {
+    $payfastBooking = createBooking('standard', 'day', 50.0, 1);
+
+    ob_start();
+    $totalPayfast = $service->confirm($payfastBooking, 'payfast');
+    ob_end_clean();
+
+    $tests->near(50.0, $totalPayfast, 'PayFast confirm valid booking');
+    $tests->same('confirmed', $payfastBooking->status, 'PayFast booking becomes confirmed');
+} catch (Throwable $e) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    $tests->same(true, false, 'PayFast should not throw exception: ' . $e->getMessage());
+}
+
+$unknownBooking = createBooking('standard', 'day', 50.0, 1);
+
+ob_start();
+$totalUnknown = $service->confirm($unknownBooking, 'moyen_inconnu');
+ob_end_clean();
+
+$tests->same('confirmed', $unknownBooking->status, 'Unknown payment method confirms in legacy');
 
 ob_end_clean();
 $tests->summary();
